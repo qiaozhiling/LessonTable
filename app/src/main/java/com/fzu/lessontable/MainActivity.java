@@ -14,13 +14,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try {
-            HttpURLConnection connection;
-            URL url = new URL("htp");
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("post");
-        }catch (Exception e){
-
-        }
+        //试试能不能push上
     }
 }
