@@ -20,14 +20,13 @@ public class TimeRange {
         this.roomName = roomName;
     }
 
-
     boolean lessonMatch(int lessonNumber, int weekDay, int week) {
-        return lessonNumber >= start && lessonNumber <= end &&
-                weekDay == weekDayIn &&
-                week <= weekStart && week >= weekEnd;
+        return lessonNumber >= start && lessonNumber <= end && weekDay == weekDayIn && week <= weekStart
+                && week >= weekEnd;
     }
 
-    String getLessonRoom(){
+    public String getLessonRoom() {
         return roomName;
     }
+
 }

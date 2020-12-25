@@ -1,7 +1,5 @@
 package com.jacky.lession.url;
 
-import com.jacky.lession.err.LogInFailureException;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,15 +8,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.jacky.lession.err.LogInFailureException;
+import com.jacky.lession.singleLession.Lesson;
+
 public class URLRequest {
     private static final Pattern cookieAnalysePattern = Pattern.compile("; ");
     private static final Pattern LessonTableUrlPattern = Pattern
             .compile("^[\\s\\S]+?<frame src=\"(right\\.aspx\\?id=\\d+)\".+/>[\\s\\S]+$");
+    private static final Pattern classPattern = Pattern.compile(
+            "^[\\S\\s]+?<font color='#[0-9A-Z]+?'>([^<>]+)</font><br>\\[<a \\s*href=javascript:pop1\\('(?:[^<>]+?)'\\)>教学大纲</a>\\|<a \\s*href=javascript:pop1\\('([^<>]+?)'\\)>授课计划</a>]<br>&nbsp;(?:[^<>]+?)<br>([^<>]+?)<br>");
 
     private static final String loginUrl = "http://59.77.226.32/logincheck.asp";
     private static final HashMap<String, String> headers = new HashMap<>();
@@ -31,13 +35,14 @@ public class URLRequest {
         headers.put("Accept", "*/*");
         headers.put("Connection", "keep-alive");
         headers.put("Content-Type", "application/x-www-form-urlencoded");
+
+        // cookies.put("ASP.NET_SessionId", "0rvikz2gnm5fcxsozzg4xj5g");
     }
 
     private String lessonTableUrl;
+    private String rootUrl;
 
-    private boolean hasDone = false;
-
-    private HttpURLConnection connection;
+    HttpURLConnection connection;
 
     public URLRequest() {
 
@@ -64,8 +69,8 @@ public class URLRequest {
 
             URL tempurl = connection.getURL();
 
-            lessonTableUrl = String.format("%s://%s/%s", tempurl.getProtocol(), tempurl.getHost(),
-                    analyseLessionTableUrl(html));
+            rootUrl = String.format("%s://%s", tempurl.getProtocol(), tempurl.getHost());
+            lessonTableUrl = String.format("%s/%s", rootUrl, analyseLessionTableUrl(html));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -78,15 +83,66 @@ public class URLRequest {
 
     }
 
+    public ArrayList<Lesson> loadTable() throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            connection = generateConnection(RequestMethod.GET, lessonTableUrl, headers, cookies);
+            connection.connect();
+            String html = getRespondHtml(connection);
+            // System.out.println(html);
+            return analyseClass(html);
+
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    public String getTeachingProject(String targetURL) throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            connection = generateConnection(RequestMethod.GET, String.format("%s/%s", rootUrl, targetURL), headers,
+                    cookies);
+            connection.connect();
+
+            return getRespondHtml(connection);
+
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+        }
+    }
+
+    private ArrayList<Lesson> analyseClass(String html) {
+        HashMap<String, Lesson> collecter = new HashMap<>();
+        int startMatchIndex = 0;
+        String usingString = html.substring(startMatchIndex);
+        Matcher result = classPattern.matcher(usingString);
+
+        while (result.lookingAt()) {
+            String t = result.group(1);
+            collecter.put(t, new Lesson(result.group(3), result.group(1), result.group(2)));
+
+            startMatchIndex = result.end();
+            usingString = usingString.substring(startMatchIndex);
+            result = classPattern.matcher(usingString);
+
+        }
+
+        return new ArrayList<>(collecter.values());
+
+    }
+
     private String analyseLessionTableUrl(String html) {
         Matcher matcher = LessonTableUrlPattern.matcher(html);
         if (matcher.matches()) {
-            return matcher.group(1);
+                return matcher.group(1);
         } else
             return "";
     }
 
-    private HttpURLConnection doRedirect(String Url, Map<String, String> headers, Map<String, String> cookies) {
+    private HttpURLConnection doRedirect(String Url, Map<String, String> headers, Map<String, String> cookies) throws IOException {
         try {
             HttpURLConnection connection = generateConnection(RequestMethod.GET, Url, headers, cookies);
             connection.connect();
@@ -101,11 +157,9 @@ public class URLRequest {
 
             return connection;
 
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } finally {
             if (connection != null)
                 connection.disconnect();
-            return connection;
         }
 
     }
@@ -153,6 +207,7 @@ public class URLRequest {
         return String.format("muser=%s&passwd=%s", URLEncoder.encode(UID, "UTF-8"),
                 URLEncoder.encode(passWord, "UTF-8"));
 
+
     }
 
     private String generateCookies(Map<String, String> cookie) {
@@ -168,9 +223,7 @@ public class URLRequest {
         return builder.toString();
     }
 
-    private HttpURLConnection generateConnection(
-            RequestMethod method, String Url,
-            Map<String, String> headers,
+    private HttpURLConnection generateConnection(RequestMethod method, String Url, Map<String, String> headers,
             Map<String, String> cookie) throws IOException {
         // 创建Url实例
         URL url = new URL(Url);
@@ -195,9 +248,5 @@ public class URLRequest {
         connection.setInstanceFollowRedirects(false);
 
         return connection;
-    }
-
-    public boolean isHasDone() {
-        return hasDone;
     }
 }
