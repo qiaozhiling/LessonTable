@@ -33,7 +33,8 @@ public class LessonTable {
         }
     }
 
-    public void getTargetTable(int week) {
+    public TargetTable getTargetTable(int week) {
+        return new TargetTable(week,lessons);
     }
 
     public LessonDetail getLesson(int week, int time, WeekDay weekDay) {

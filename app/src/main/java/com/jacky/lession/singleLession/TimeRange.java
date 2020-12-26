@@ -23,12 +23,29 @@ public class TimeRange {
     }
 
     boolean lessonMatch(int lessonNumber, WeekDay weekDay, int week) {
-        return lessonNumber >= start && lessonNumber <= end && weekDay.getWeekDay() == weekDayIn && week >= weekStart
+        return hasClassInTargetLessonTime(lessonNumber) &&
+                hasClassInTargetDay(weekDay) &&
+                hasClassInTargetWeek(week);
+    }
+
+    boolean hasClassInTargetWeek(int week) {
+        return week >= weekStart
                 && week <= weekEnd;
+    }
+
+    boolean hasClassInTargetDay(WeekDay weekDay) {
+        return weekDay.getWeekDay() == weekDayIn;
+    }
+    boolean hasClassInTargetLessonTime(int lessonNum){
+        return lessonNum >= start && lessonNum <= end;
     }
 
     public String getLessonRoom() {
         return roomName;
+    }
+
+    int getWeekDayIn() {
+        return weekDayIn;
     }
 
 }

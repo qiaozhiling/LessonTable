@@ -43,6 +43,9 @@ public class Lesson {
         return teachProject;
     }
 
+    private void addTimeRange(TimeRange timeRange){
+        timeRanges.put(timeRange.getWeekDayIn(),timeRange);
+    }
     public void loadNewTimeRangeFormTeachingProject(String html) {
         int matchStatartIndex = 0;
         String usingString = html.substring(matchStatartIndex);
@@ -76,4 +79,25 @@ public class Lesson {
         return timeRanges.get(weekDay.getWeekDay());
     }
 
+    public boolean hasClassInTargetWeek(int week){
+        for (TimeRange t :
+                timeRanges.values()) {
+            if (t.hasClassInTargetWeek(week))return true;
+        }return false;
+    }
+    public Lesson generateTargetWeekLesson(int week){
+        Lesson tL=new Lesson(this.teacher,this.lessonName,this.teachProject);
+        for (TimeRange t :
+                timeRanges.values()) {
+            if (t.hasClassInTargetWeek(week)){
+                tL.addTimeRange(t);
+            }
+        }
+        return tL;
+    }
+
+    public boolean hasClassInTargetDay(WeekDay weekDay){
+        TimeRange t = timeRanges.get(weekDay.getWeekDay());
+        return t!=null;
+    }
 }
