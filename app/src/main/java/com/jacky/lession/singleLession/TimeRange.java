@@ -1,5 +1,7 @@
 package com.jacky.lession.singleLession;
 
+import com.jacky.lession.WeekDay;
+
 public class TimeRange {
     private final int start;
     private final int end;
@@ -20,9 +22,9 @@ public class TimeRange {
         this.roomName = roomName;
     }
 
-    boolean lessonMatch(int lessonNumber, int weekDay, int week) {
-        return lessonNumber >= start && lessonNumber <= end && weekDay == weekDayIn && week <= weekStart
-                && week >= weekEnd;
+    boolean lessonMatch(int lessonNumber, WeekDay weekDay, int week) {
+        return lessonNumber >= start && lessonNumber <= end && weekDay.getWeekDay() == weekDayIn && week >= weekStart
+                && week <= weekEnd;
     }
 
     public String getLessonRoom() {

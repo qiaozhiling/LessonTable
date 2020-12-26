@@ -1,5 +1,7 @@
 package com.jacky.lession.singleLession;
 
+import com.jacky.lession.WeekDay;
+
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -62,16 +64,16 @@ public class Lesson {
 
     }
 
-    public boolean hasClass(int week, int weekDay, int classTime) {
-        TimeRange t = timeRanges.get(weekDay);
+    public boolean hasClass(int week, WeekDay weekDay, int classTime) {
+        TimeRange t = timeRanges.get(weekDay.getWeekDay());
         if (t != null) {
             return t.lessonMatch(classTime, weekDay, week);
         }
         return false;
     }
 
-    public TimeRange getClass(int weekDay) {
-        return timeRanges.get(weekDay);
+    public TimeRange getClass(WeekDay weekDay) {
+        return timeRanges.get(weekDay.getWeekDay());
     }
 
 }
