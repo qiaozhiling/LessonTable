@@ -33,10 +33,11 @@ public class LessonTable {
         }
     }
 
-    public void getTargetTable(int week) {
+    public TargetTable getTargetTable(int week) {
+        return new TargetTable(week,lessons);
     }
 
-    public LessonDetail getLesson(int week, int time, int weekDay) {
+    public LessonDetail getLesson(int week, int time, WeekDay weekDay) {
         if (lessons == null) {
             throw new BadLoginStatuteException("未登录！");
         } else {

@@ -1,5 +1,7 @@
 package com.jacky.lession.singleLession;
 
+import com.jacky.lession.WeekDay;
+
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -41,6 +43,9 @@ public class Lesson {
         return teachProject;
     }
 
+    private void addTimeRange(TimeRange timeRange){
+        timeRanges.put(timeRange.getWeekDayIn(),timeRange);
+    }
     public void loadNewTimeRangeFormTeachingProject(String html) {
         int matchStatartIndex = 0;
         String usingString = html.substring(matchStatartIndex);
@@ -62,16 +67,37 @@ public class Lesson {
 
     }
 
-    public boolean hasClass(int week, int weekDay, int classTime) {
-        TimeRange t = timeRanges.get(weekDay);
+    public boolean hasClass(int week, WeekDay weekDay, int classTime) {
+        TimeRange t = timeRanges.get(weekDay.getWeekDay());
         if (t != null) {
             return t.lessonMatch(classTime, weekDay, week);
         }
         return false;
     }
 
-    public TimeRange getClass(int weekDay) {
-        return timeRanges.get(weekDay);
+    public TimeRange getClass(WeekDay weekDay) {
+        return timeRanges.get(weekDay.getWeekDay());
     }
 
+    public boolean hasClassInTargetWeek(int week){
+        for (TimeRange t :
+                timeRanges.values()) {
+            if (t.hasClassInTargetWeek(week))return true;
+        }return false;
+    }
+    public Lesson generateTargetWeekLesson(int week){
+        Lesson tL=new Lesson(this.teacher,this.lessonName,this.teachProject);
+        for (TimeRange t :
+                timeRanges.values()) {
+            if (t.hasClassInTargetWeek(week)){
+                tL.addTimeRange(t);
+            }
+        }
+        return tL;
+    }
+
+    public boolean hasClassInTargetDay(WeekDay weekDay){
+        TimeRange t = timeRanges.get(weekDay.getWeekDay());
+        return t!=null;
+    }
 }
